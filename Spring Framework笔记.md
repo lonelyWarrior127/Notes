@@ -360,7 +360,7 @@ component-scan :组件扫描器，组件是Java对象
 
 **创建对象的4个注解**：
 
-1. @Component：普通Java对象。在不属于后3个角色的时候，使用此注解创建对象最合适
+1. @Component(value=“xxx”)：普通Java对象。在不属于后3个角色的时候，使用此注解创建对象最合适。省略value=也可以（常用），如果只写@Component则会默认value=首字母小写的类名。
 2. @Repository：dao对象。放在dao接口的实现类上面，表示创建<u>dao对象</u>，<u>持久层对象</u>，能访问数据库
 3. @Service：<u>service对象</u>。放在业务层接口的实现类上面，表示创建<u>业务层对象</u>，业务层对象具有事务能力
 4. @Controller：controller对象。放在控制器类上面，表示创建<u>控制器对</u>象。属于表示层对象视图层对象）。控制器对象能接受请求，把请求的处理结果显示给用户。
@@ -420,7 +420,7 @@ int age;
 
 **引用类型赋值：**（使用bean）
 
-1. @Autowired：spring框架提供给引用类型赋值，使用自动注入原理。支持byName，byType（默认）
+1. @Autowired：spring框架提供给引用类型赋值，使用自动注入原理。支持byName，**byType（默认）**
 
    使用位置：1）属性定义的上面，无需set方法；2）在set方法的上面
 
