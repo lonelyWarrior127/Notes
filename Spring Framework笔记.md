@@ -367,6 +367,56 @@ component-scan :组件扫描器，组件是Java对象
 
 以上4个注解都能**创建对象**，但是后3个语句具有角色的说明，表示对象是分层的，对象时属于不同层的，具有额外的功能。
 
+【补充】：[@Configuration + @Bean](https://blog.csdn.net/qq_45383769/article/details/118748912)  ---->创建对象
+
+@Configuration：告诉spring这是一个配置类 == 配置文件。
+
+@Bean：给容器添加组件，以方法名作为组件的id。返回类型为组件类型，返回的值就是组件在容器中的实例。
+
+```java
+@Configuration
+public class UserConfig{
+    @Value("${user.name}")
+    private String userName;
+    
+    @Bean
+    public UserManager userManager(String userNam){
+        UserManage userManager = new UserManager(userName);
+        return userManager;
+    }
+    
+    @Bean
+    public Pet pet(){
+        return new  Pet("旺财");
+    }
+    
+    
+}
+
+@Component
+public class UserManager{
+    public String userName;
+    public UserManager(){
+        
+    }
+    
+     public UserManager(String userName){
+         this.userName = userName;
+    }
+    
+    public String getUserName(){
+        return userName;
+    }
+    
+    
+}
+/*
+@Configuration 加 @Bean 会创建一个 userName 不为 null 的 UserManager 对象，而 @Component 也会创建一个 userName 为 null 的 UserManager 对象
+*/
+```
+
+
+
 **扫描多个包的3中方式：**
 
 1. 使用多的组件扫描器
