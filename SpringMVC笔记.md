@@ -277,14 +277,29 @@ public class DispatcherServlet extends HttpServlet{
 
 ### 2. SpringMVC注解式开发
 
-#### 2.1 @RequestMapping定义请求规则
+#### 2.1 [@RequestMapping](https://blog.csdn.net/m0_67401055/article/details/125057030)定义请求规则
 
-@RequestMapping：
+@RequestMapping：一个用来处理请求地址映射的注解，可用于映射一个请求或一个方法，可以用在类或方法上。
 
-​		属性：value请求的url地址    位置：1）在方法的上面，必须的，2）在类的上面作为模块名称
+​		属性：**value请求的url地址**    
 
-​			       method 请求的方式，使用RequestMethod类的枚举值。不指定method属性，请求方式没有限制
-​		  		         例如：RequestMethod.GET  RequestMethod.POST				
+​					位置：1）用于方法，必须的，表示在类的父路径下追加方法上注解中的地址将会访问到该方法。
+
+​								2）用于类，表示类中的所有响应请求的方法都是以该地址作为父路径
+
+​			       **method 请求的方式**，使用RequestMethod类的枚举值。不指定method属性，请求方式没有限制
+​		  		         例如：RequestMethod.GET  RequestMethod.POST
+
+@GetMapping：处理get方式请求的映射
+
+@PostMapping：处理post方式请求的映射
+
+@PutMapping：处理put方式请求的映射
+
+@DeleteMapping：处理delete方式请求的映射
+
+@GetMapping就相当于@RequestMapping(method=RequestMethod.GET),它会将get映射到特定的方法上。
+		
 
 ##### 2.1.1 指定模块名称
 
@@ -317,7 +332,7 @@ public class MyController {
 
 ##### 2.1.2 对请求提交方式的定义
 
-#### 2.2 接收请求中的参数
+#### 2.2 [接收请求中的参数](https://blog.csdn.net/lianghecai52171314/article/details/119747111)
 
 只需要在控制器方法的形参列表中定义即可。框架会给参数赋值，在控制器方法内部可以直接使用request\response\session参数
 
@@ -326,11 +341,12 @@ public class MyController {
 - HttpSession
 - 请求中所携带的请求参数
 
-接收请求的参数：逐个接收，对象接收
+SpringMVC接收参数主要通过以下几种方式：
 
-
-
-400 ：http status，表示客户端异常，主要发生在用户提交参数过程中
+- 处理request uri 部分（这里指uri template中variable，不含queryString部分）的注解： @PathVariable;
+- 处理request header部分的注解： @RequestHeader, @CookieValue;
+- 处理request body部分的注解：@RequestParam, @RequestBody;
+- 处理attribute类型是注解： @SessionAttributes, @ModelAttribute;
 
 ##### 2.2.1 逐个接收：请求中的参数名和控制器方法的形参名一样
 
@@ -415,15 +431,17 @@ public ModelAndView doPropertyParam(String name, Integer age){
 
 ```
 
-##### 2.2.2逐个接收请求参数：请求参数名和控制器方法的形参名不一样
+##### 2.2.2逐个接收请求参数@RequestParam：请求参数名和控制器方法的形参名不一样
 
-@RequestParam ：解决名称不一样问题： 
+- @RequestParam ：解决名称不一样问题： 
 
-​				属性：value 请求中的参数名
+  - 属性：
+    - value 请求中的参数名
+    - required:boolean类型，默认是true：请求中必须有此参数，没有就报错
 
-​							required:boolean类型，默认是true：请求中必须有此参数，没有就报错
+  - 位置： 在形参定义的前面
 
-​				位置： 在形参定义的前面
+- @RequestParam用来处理Content-Type为 application/x-www-form-urlencoded编码的内容，提交方式GET、POST
 
 ```java
 
@@ -449,7 +467,9 @@ public ModelAndView doPropertyParam(String name, Integer age){
     </form>
 ```
 
-##### 2.2.3 对象接收参数
+##### 2.2.3 JavaBean对象接收参数
+
+存在这样一种情况，当我们的前端参数数量特别多的时候，如果按照方法参数来接收，那么此时一个方法里面可能就需要写几十个参数名称，显然这样是不合理的，解决这个问题的办法就是通过一个对象来接收前端所有的参数，这个对象就是我们说的一个JavaBean，也就是pojo实体类对象。
 
 对象接收：在控制器方法的形参是JAVA对象，使用JAVA独享的属性接收请求中的参数。
 
@@ -459,9 +479,38 @@ public ModelAndView doPropertyParam(String name, Integer age){
 
 ​					1. 调用JAVA对象的无参数构造方法创建对象
 
-                       2. 调用对象set方法，同名的参数，调用对应的set方法。如参数是name，调用setName(参数值)
+​					2. 调用对象set方法，同名的参数，调用对应的set方法。如参数是name，调用setName(参数值)。    
 
 ```java
+public class User {
+    private String username;
+    private String password;
+ 
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+
+@Controller
+public class ParamController {
+    @RequestMapping("/param04")
+    public String param04(User user) {
+        System.out.println("username=" + user.getUsername());
+        System.out.println("password=" + user.getPassword());
+        return "hello";
+    }
+ 
+}
+
 @RequestMapping("/receive-object.do")
     public ModelAndView doReceiveObject(Student student){
         ModelAndView mv = new ModelAndView();
@@ -472,13 +521,358 @@ public ModelAndView doPropertyParam(String name, Integer age){
     }
 ```
 
+<img src="C:\Users\pyao\AppData\Roaming\Typora\typora-user-images\image-20220823231013461.png" alt="image-20220823231013461" style="zoom: 50%;" />
 
+
+
+##### 2.2.4 通过HttpServletRequest接收参数
+
+在SpringMVC框架中，我们的方法参数里面可以直接使用servlet中的请求对象，要使用servlet的相关api，那么我们需要引入【servlet-api】的依赖，如下所示：
+
+```xml
+<!-- 引入servlet-api依赖 -->
+<dependency>
+  <groupId>javax.servlet</groupId>
+  <artifactId>servlet-api</artifactId>
+  <version>2.5</version>
+  <!-- 作用域设置为已被提供: 表示servlet-api依赖会被Tomcat容器提供，
+  打包时候不会再将servlet-api加入到里面 -->
+  <scope>provided</scope>
+</dependency>
+```
+
+```java
+//通过【HttpServletRequest】获取请求参数。
+//这种获取参数的方式就是最原始的，直接从HTTP请求里面获取。
+@Controller
+public class ParamController {
+ 
+    // HttpServletRequest获取参数
+    @RequestMapping("/param02")
+    public String param02(HttpServletRequest request) {
+        System.out.println("username=" + request.getParameter("username"));
+        System.out.println("password=" + request.getParameter("password"));
+        return "hello";
+    }
+}
+```
+
+##### 2.2.5 通过@PathVariable注解获取参数
+
+- 路径参数：【/请求路径/{参数名称1}/{参数名称2}】
+  - 路径参数需要使用【{}】花括号括起来，参数名称任意。
+- @PathVariable 注解可以将 URL 中动态参数绑定到控制器处理方法的入参中@PathVariable注解只有一个value属性， 类型为String，表示绑定的名称，如果缺省则默认绑定 同名参数。
+
+```java
+@Controller
+public class ParamController {
+    @RequestMapping("/param05/{username}/{password}")
+    public String param05(@PathVariable String username, @PathVariable String password) {
+        System.out.println("username=" + username);
+        System.out.println("password=" + password);
+        return "hello";
+    }
+}
+
+//路径参数中的参数名称需要和方法参数名称一致，这样SpringMVC才能够将其进行映射；
+//也可以通过指定【@PathVariable】注解的【value】属性值来关联路径参数。
+```
+
+```java
+@Controller
+public class ParamController {
+    @RequestMapping("/param05/{uname}/{pass}") {
+    public String param05(@PathVariable("uname") String username, @PathVariable("pass") String password) {
+        System.out.println("username=" + username);
+        System.out.println("password=" + password);
+        return "hello";
+    }
+}
+```
+
+##### 2.2.6 @RequestBody
+
+- 将页面传递过来的JSON对象转换成Java对象
+- @RequestBody注解常用来处理Content-Type是application/json, application/xml等，不是application/x-www-form-urlencoded编码（表单参数提交）的内容；
+- @RequestBody 注解用于读取 Request 请求的 body 部分数据，使用系统默认配置的 HttppMessageConverter 进行解析，然后把相应的数据绑定到 Controller 方法的参数上。
+- @RequestBody不能接收表单提交的数据.
+
+##### 2.2.7 RequestHeader
+
+- 把Request请求header部分的值绑定到方法的参数上
+
+```java
+@Controller
+@RequestMapping("/demo")
+public class DemoController {
+
+    @GetMapping("/fun1")
+    public void fun1() {
+        System.out.println(33);
+    }
+
+    @GetMapping("/fun2")
+    public void fun2(HttpServletRequest request) {
+        String token = request.getHeader("token");
+        System.out.println(token);
+        String p = request.getHeader("p");
+        System.out.println(p);
+    }
+
+    @GetMapping("/fun3")
+    public void fun2(@RequestHeader("token") String token, @RequestHeader("p") String p) {
+        System.out.println(token);
+        System.out.println(p);
+    }
+
+    @GetMapping("/fun4")
+    public void fun3(@RequestHeader("token") String token,
+                     @RequestHeader("p") String p) {
+        System.out.println(token);
+        System.out.println(p);
+    }
+}
+```
+
+##### 2.2.8 @CookieValue
+
+@CookieValue 可以把Request header中关于cookie的值绑定到方法的参数上。
+@CookieValue 注解用于将请求的 Cookie 信息映射到处理的方法参数上
+
+```java
+@Controller
+@RequestMapping("/demo")
+public class DemoController {
+
+    @GetMapping("/fun")
+    public void fun(@CookieValue("cid") String cid){
+        System.out.println(cid);
+    }    
+｝
+```
+
+##### 2.2.9 @ModelAttribute
+
+- 是将数据添加到模型对象中，用于视图页面展示时使用。
+- 只有 一个 value 属性，类型为 String， 表示的属性名称
+- 使用位置：
+  - 应用在方法上
+  - 应用在方法的参数上
+  - 应用在方法上，并且方法也使用了`@RequestMapping`
+- 被`@ModelAttribute`注解的方法会在`Controller`每个方法执行之前都执行，因此对于一个`Controller`中包含多个URL的时候，要谨慎使用
+
+```java
+//控制器类
+//@ModelAttribute注解放在处理方法的形参上，用于将多个请求参数封装到一个实体对象，从而简化数据绑定流程，而且自动暴露为模型数据。
+
+@Controller
+@RequestMapping("/user")
+public class UserController {
+	@RequestMapping("/login")
+	public String login(@ModelAttribute("u") User user){
+		if("zhangsan".equals(user.getUname())){
+	        //使用@ModelAttribute("u")相当于使用model.addAttribute("u",user)
+		    //页面中使用el表达式${u.uname}取出ModelAttribute中的uname值
+			return "success";
+		}else{
+			return "login";
+		}
+	}
+}
+
+
+@Controller
+@RequestMapping("/user")
+public class UserController {
+	@RequestMapping("/login")
+	public String login(@ModelAttribute User u){
+		if("zhangsan".equals(u.getUname())){
+	        /* 使用@ModelAttribute User u相当于model.addAttribute("user",u)
+	           默认model.addAttribute("user",user)中的key值为类名且首字母小写
+		       页面中使用el表达式${user.uname}取出ModelAttribute中的uname值 */
+			return "success";
+		}else{
+			return "login";
+		}
+	}
+}
+```
+
+1、@ModelAttribute使用在方法(返回值)上，方法没有返回值(void类型)， Model(Map)参数需要自行设置。
+
+```java
+@Controller
+@RequestMapping(value = "/modelattribute")
+public class ModelAttributeController {
+
+    @ModelAttribute
+    public void myModel(@RequestParam(required = false) String abc, Model model) {
+        model.addAttribute("attributeName", abc);
+    }
+
+    @RequestMapping(value = "/method")
+    public String method() {
+        return "method";
+    }
+}
+
+@RequestMapping(value = "/method")
+public String method(@RequestParam(required = false) String abc, Model model) {
+    model.addAttribute("attributeName", abc);
+    return "method";
+}
+```
+
+> 这个例子，在请求`/modelattribute/method?abc=aaa`后，会先执行`myModel`方法，然后接着执行`method`方法，参数`abc`的值被放到`Model`中后，接着被带到`method`方法中。
+>
+> 当返回视图`/modelattribute/method`时，`Model`会被带到页面上，当然你在使用`@RequestParam`的时候可以使用`required`来指定参数是否是必须的。
+
+2、@ModelAttribute使用在方法(返回值)上，方法有返回值(非void类型)，返回值会添加到Model(Map)参数，key由@ModelAttribute的value指定，否则会使用返回值类型字符串(首写字母变为小写)。
+
+```java
+@ModelAttribute
+public String myModel(@RequestParam(required = false) String abc) {
+    return abc;
+}
+
+@ModelAttribute
+public Student myModel(@RequestParam(required = false) String abc) {
+    Student student = new Student(abc);
+    return student;
+}
+
+@ModelAttribute
+public int myModel(@RequestParam(required = false) int number) {
+    return number;
+}
+```
+
+> 对于这种情况，返回值对象会被默认放到隐含的`Model`中，在`Model`中的`key`为**`返回值首字母小写`**，`value`为返回的值。
+>
+> 上面3种方法相当于：
+>
+> ```java
+> model.addAttribute("string", abc);
+> model.addAttribute("int", number);
+> model.addAttribute("student", student);
+> 
+> 在jsp页面使用${int}表达式时会报错：javax.el.ELException: Failed to parse the expression [${int}]。
+> 解决办法：
+> 在tomcat的配置文件conf/catalina.properties添加配置org.apache.el.parser.SKIP_IDENTIFIER_CHECK=true
+>     
+> 想自定义其实很简单，只需要给@ModelAttribute添加value属性即可，如下：
+> @ModelAttribute(value = "num")
+> public int myModel(@RequestParam(required = false) int number) {
+>     return number;
+> }
+> 这样就相当于`model.addAttribute("num", number);`。
+> ```
+
+3、@ModelAttribute使用在方法参数中。
+
+```java
+@Controller
+@RequestMapping(value = "/modelattribute")
+public class ModelAttributeParamController {
+
+    @ModelAttribute(value = "attributeName")
+    public String myModel(@RequestParam(required = false) String abc) {
+        return abc;
+    }
+
+    @ModelAttribute
+    public void myModel3(Model model) {
+        model.addAttribute("name", "zong");
+        model.addAttribute("age", 20);
+    }
+
+    @RequestMapping(value = "/param")
+    public String param(@ModelAttribute("attributeName") String str,
+                       @ModelAttribute("name") String str2,
+                       @ModelAttribute("age") int str3) {
+        return "param";
+    }
+}
+//使用@ModelAttribute注解的参数，意思是从前面的Model中提取对应名称的属性。
+```
+
+4. 用在方法上，并且方法上使用隔离@ReuquestMapping
+
+```java
+@Controller
+@RequestMapping(value = "/modelattribute")
+public class ModelAttributeController {
+
+    @RequestMapping(value = "/test")
+    @ModelAttribute("name")
+    public String test(@RequestParam(required = false) String name) {
+        return name;
+    }
+}
+
+这种情况下，返回值String（或者其他对象）就不再是视图了，而是放入到Model中的值，此时对应的页面就是@RequestMapping的值test。
+如果类上有@RequestMapping，则视图路径还要加上类的@RequestMapping的值，本例中视图路径为modelattribute/test.jsp。
+
+```
+
+
+
+【注】在一个控制器(使用了@Controller)中，如果存在一到多个使用了@ModelAttribute的方法，这些方法总是在进入控制器方法之前执行，并且执行顺序是由加载顺序决定的(具体的顺序是带参数的优先，并且按照方法首字母升序排序)
+
+```java
+@Slf4j
+@RestController
+public class ModelAttributeController {
+
+ @ModelAttribute
+ public void before(Model model) {
+ log.info("before..........");
+ model.addAttribute("before", "beforeValue");
+ }
+
+ @ModelAttribute(value = "beforeArg")
+ public String beforeArg() {
+ log.info("beforeArg..........");
+ return "beforeArgValue";
+ }
+
+ @GetMapping(value = "/modelAttribute")
+ public String modelAttribute(Model model, @ModelAttribute(value = "beforeArg") String beforeArg) {
+ log.info("modelAttribute..........");
+ log.info("beforeArg..........{}", beforeArg);
+ log.info("{}", model);
+ return "success";
+ }
+
+ @ModelAttribute
+ public void after(Model model) {
+ log.info("after..........");
+ model.addAttribute("after", "afterValue");
+ }
+
+ @ModelAttribute(value = "afterArg")
+ public String afterArg() {
+ log.info("afterArg..........");
+ return "afterArgValue";
+ }
+}
+```
+
+> 输出：
+>
+> after..........
+> before..........
+> afterArg..........
+> beforeArg..........
+> modelAttribute..........
+> beforeArg..........beforeArgValue
+> {after=afterValue, before=beforeValue, afterArg=afterArgValue, beforeArg=beforeArgValue}
 
 #### 2.3 控制器方法的返回值
 
-控制器方法的返回值表示本次请求的处理结果，返回值有ModelAndView、Stirng、void、Object
+控制器方法的返回值表示本次请求的处理结果，**返回值有ModelAndView、Stirng、void、Object**
 
-请求的处理结果包含数据和视图（仅数据、仅视图、数据和视图）
+请求的处理结果包含数据和视图（**仅数据、仅视图、数据和视图**）
 
 ##### 2.3.1 ModelAndView数据和视图
 
@@ -1137,6 +1531,89 @@ public class GlobalExceptionHandler {
 <context:component-scan base-package="com.handle"/>
 <mvc:annotation-driven/>
 ```
+
+【实例】**通过HandlerExceptionResolver进行全局异常处理**
+
+```java
+package com.vgixt.learn.springmvc.ssm.exceptionhandler;
+
+import com.vgixt.learn.springmvc.ssm.exception.ParamException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@Component//我们自定义一个类，这个类实现了HandlerExceptionResolver接口之后，它就会成为我们的全局异常处理器
+@Slf4j
+public class ExceptionHandler implements HandlerExceptionResolver {
+    /**
+     * 下面的这个方法，就是捕获到了异常之后，进行处理的方法
+     * @param request
+     * @param response
+     * @param handler
+     * @param ex
+     * @return
+     */
+    @Override
+    public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        ex.printStackTrace();
+        log.error(ex.getMessage());
+        ModelAndView mv = new ModelAndView();
+        //不同的异常，我们给出不同的错误提示
+        if (ex instanceof ParamException) { //我们自定义的业务异常
+            mv.addObject("errorMsg", ex.getMessage());
+        } else {
+            mv.addObject("errorMsg", "服务器执行失败，请联系管理员   mail.vge@163.com");
+        }
+        mv.setViewName("error");
+        return mv;
+    }
+}
+```
+
+【实例】**通过@ControllerAdivce注解解决全局异常**
+
+@ControllerAdvice注解，这个注解非常有用，它表示的就是一个增强的Controller，使用这个增强的Controller我们可以进行全局异常处理。
+
+```java
+package com.vgixt.learn.springmvc.ssm.exceptionhandler;
+
+import com.vgixt.learn.springmvc.ssm.exception.ParamException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.ModelAndView;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    /**
+     * 这个方法用来专门处理ParamException
+     * @return
+     */
+    @ExceptionHandler(ParamException.class)
+    public ModelAndView paramExceptionHandler(ParamException e) {
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("errorMsg", e.getMessage() + ", ControllerAdvice");
+        mv.setViewName("error");
+        return mv;
+    }
+
+    /**
+     * 站门用来处理其他的Exception
+     * @return
+     */
+    @ExceptionHandler(Exception.class)
+    public ModelAndView otherExceptionHandler(Exception e) {
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("errorMsg", "服务器执行失败，请联系管理员   mail.vge@163.com, ControllerAdvice");
+        mv.setViewName("error");
+        return mv;
+    }
+}
+```
+
+
 
 #### 4.3 拦截器
 
