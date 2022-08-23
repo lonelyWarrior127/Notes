@@ -659,6 +659,7 @@ public class DemoController {
   - 应用在方法上
   - 应用在方法的参数上
   - 应用在方法上，并且方法也使用了`@RequestMapping`
+- Spring 框架会将 Model 传递给前端。 Model 的生命周期只存在于 HTTP 请求的处理过程中，请求处理完成后， Model 就销毁了。如果想让 参数在多个请求间共享，那么需要用到＠SessionAttributes 注解。＠SessionAttributes 注解只能声 明在类上，不能声明在方法上
 - 被`@ModelAttribute`注解的方法会在`Controller`每个方法执行之前都执行，因此对于一个`Controller`中包含多个URL的时候，要谨慎使用
 
 ```java
