@@ -1727,7 +1727,7 @@ public void afterCompletion(HttpServletRequest request, HttpServletResponse resp
     - Object handler 被拦截的控制器对象（MyController）
     - Exception ex：异常对象
 - 特点：
-  - 执行时间：在**请求处理完成后**执行的。请求处理完成的标志是视图处理完成，对视图执行forward操作后
+  - 执行时间：在**请求处理完成后**执行的。<u>请求处理完成的标志是视图处理完成</u>，对视图执行forward操作后
   - 可以做程序最后要做的工作，例如释放内存、清理临时变量。
   - 方法执行的条件：1）当前的拦截器preHandle()方法必须执行；2）preHandle()方法方法必须返回true
 
@@ -1765,10 +1765,12 @@ public void afterCompletion(HttpServletRequest request, HttpServletResponse resp
     </mvc:interceptors>
 ```
 
+
+
 #### 4.3.3 多拦截器的执行顺序
 
 - 对于有多个拦截器存在时，如果preHandle方法中返回的都为true，那么拦截器方法就会按：preHnadle顺序执行--》调用目标方法--》postHandle按反序执行--》渲染视图--》afterHandle按反序执行。
-- 当有多个拦截器时，形成拦截器链。拦截器链的执行顺序，与其注册顺序一致。需要再次强调一点的是，当某一个拦截器的 preHandle()方法返回 true并被执行到时，会向一个专门的方法栈中放入该拦截器的 afterCompletion()方法。 
+- 当有多个拦截器时，形成拦截器链。**拦截器链的执行顺序，与其注册顺序一致**。需要再次强调一点的是，当某一个拦截器的 preHandle()方法返回 true并被执行到时，会向一个专门的方法栈中放入该拦截器的 afterCompletion()方法。 
 - 只要有一个 preHandle()方法返回 false，则上部的执行链将被断开，其后续的处理器方法与 postHandle()方法将无法执行。但，无论执行链执行情况怎样，只要方法栈中有方法，即执行链中只要有 preHandle()方法返回 true，就会执行方法栈中的 afterCompletion()方法。最终都会给出响应。
 - 当任意一个拦截器的preHandler()方法的返回值为false时，拦截器的controller方法均不会被执行。
 
