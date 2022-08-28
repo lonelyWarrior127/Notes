@@ -1227,4 +1227,10 @@ public void testPageHelper(){
     }
 ```
 
+### 进阶知识
+
+1. Mybatis 中的 DAO 接口和 XML 文件里的 SQL 是如何建立关系的
+
+
+
 ================Mybatis-plus==============

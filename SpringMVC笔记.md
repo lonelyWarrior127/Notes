@@ -341,12 +341,7 @@ public class MyController {
 - HttpSession
 - 请求中所携带的请求参数
 
-SpringMVC接收参数主要通过以下几种方式：
 
-- 处理request uri 部分（这里指uri template中variable，不含queryString部分）的注解： @PathVariable;
-- 处理request header部分的注解： @RequestHeader, @CookieValue;
-- 处理request body部分的注解：@RequestParam, @RequestBody;
-- 处理attribute类型是注解： @SessionAttributes, @ModelAttribute;
 
 ##### 2.2.1 逐个接收：请求中的参数名和控制器方法的形参名一样
 
