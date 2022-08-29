@@ -817,6 +817,8 @@ where标签可以自动添加where，同时处理sql语句中第一个and关键�
 
 #### 4.3 foreach
 
+<img src="https://img-blog.csdnimg.cn/2dc4ea5f88944240bb485396a12dd398.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAQ1bplK7pg73noo7kuoY=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述" style="zoom: 50%;" />
+
 手工实现循环：
 
 ```sql
